@@ -30,13 +30,11 @@ h1{
     text-shadow:0 0 10px #ffd700,0 0 20px #ffb700;
 }
 
-/* 圣诞树整体 */
 .tree{
     width:240px;
     margin:0 auto;
 }
 
-/* 按钮 */
 button{
     margin:20px auto;
     padding:10px 26px;
@@ -47,7 +45,6 @@ button{
     color:#fff;
 }
 
-/* 灯闪烁 */
 .light{
     animation: blink 1.5s infinite alternate;
 }
@@ -65,12 +62,10 @@ button{
 
 <div class="tree">
 <svg viewBox="0 0 200 300" width="100%">
-    <!-- 树 -->
     <polygon points="100,10 30,120 170,120" fill="#0a6"/>
     <polygon points="100,60 20,180 180,180" fill="#0c8"/>
     <polygon points="100,120 10,260 190,260" fill="#0e9"/>
 
-    <!-- 灯 -->
     <circle cx="100" cy="80" r="4" fill="red" class="light"/>
     <circle cx="70" cy="120" r="4" fill="gold" class="light"/>
     <circle cx="130" cy="120" r="4" fill="cyan" class="light"/>
@@ -84,16 +79,14 @@ button{
 <button id="play">▶ 播放圣诞音乐</button>
 
 <audio id="music" loop>
-    <source src="https://cdn.pixabay.com/download/audio/2022/12/02/audio_4d6a3b3a6d.mp3">
+  <source src="https://cdn.pixabay.com/download/audio/2022/12/02/audio_4d6a3b3a6d.mp3">
 </audio>
 
 <script>
-// 名字
 const p = new URLSearchParams(location.search);
 document.getElementById("name").innerText =
     p.get("name") || "Merry Christmas";
 
-// 音乐（微信 100% 成功写法）
 document.getElementById("play").onclick = function(){
     document.getElementById("music").play();
 };
