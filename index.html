@@ -1,32 +1,54 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Merry Christmas</title>
+
+<!-- 艺术字体 -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+
 <style>
-body{
+html,body{
     margin:0;
+    padding:0;
     background:#000;
+    overflow:hidden;
     color:#fff;
     text-align:center;
-    overflow:hidden;
-    font-family:Arial,"PingFang SC";
+    font-family:"PingFang SC","Microsoft YaHei",sans-serif;
+}
+h1{
+    margin-top:20px;
+    font-size:36px;
+    letter-spacing:2px;
+}
+.name{
+    font-family:"Great Vibes","PingFang SC";
+    font-size:48px;
+    margin-top:10px;
+    color:#ffd700;
+    text-shadow:0 0 10px #ffd700,0 0 20px #ffae00;
+}
+.tip{
+    position:fixed;
+    bottom:20px;
+    width:100%;
+    font-size:14px;
+    opacity:.85;
 }
 canvas{display:block}
-h1{margin-top:30px}
-.name{font-size:36px;color:#ffd700;margin-top:10px}
-.tip{position:fixed;bottom:20px;width:100%;font-size:14px;opacity:.8}
 </style>
 </head>
+
 <body>
 
 <h1>🎄 Merry Christmas 🎄</h1>
 <div class="name" id="name"></div>
-<canvas id="c"></canvas>
-<div class="tip">点击屏幕播放音乐 🎶</div>
+<canvas id="canvas"></canvas>
+<div class="tip">🎶 点击任意位置，点亮圣诞树并播放音乐</div>
 
-<audio id="music" loop>
+<audio id="music" preload="auto" loop>
 <source src="https://cdn.pixabay.com/download/audio/2022/12/02/audio_4d6a3b3a6d.mp3">
 </audio>
 
@@ -34,47 +56,55 @@ h1{margin-top:30px}
 // ===== 名字 =====
 const params = new URLSearchParams(location.search);
 document.getElementById("name").innerText =
-    params.get("name") || "亲爱的朋友";
+    params.get("name") || "Merry Christmas";
 
-// ===== Canvas =====
-const c = document.getElementById("c");
-const ctx = c.getContext("2d");
+// ===== Canvas 初始化 =====
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
 
 function resize(){
-    c.width = innerWidth;
-    c.height = innerHeight;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 }
 resize();
-onresize = resize;
+window.addEventListener("resize",resize);
 
-// ===== 灯 =====
+// ===== 圣诞树灯（正三角） =====
 const lights = [];
-const colors = ["red","gold","lime","cyan","magenta"];
+const colors = ["#ff4d4d","#ffd700","#4dff4d","#4dd2ff","#ff66ff"];
 
-for(let i=0;i<500;i++){
-    const level = Math.random();
-    const y = c.height*0.75 - level*c.height*0.6;
-    const spread = (c.height*0.75 - y)*0.6;
-    lights.push({
-        x: c.width/2 + (Math.random()-0.5)*spread,
-        y,
-        r: Math.random()*2 + 1,
-        a: Math.random(),
-        s: Math.random()*0.05 + 0.01,
-        color: colors[Math.floor(Math.random()*colors.length)]
-    });
+function buildTree(){
+    lights.length = 0;
+    const baseY = canvas.height * 0.78;
+    const height = canvas.height * 0.55;
+
+    for(let i=0;i<600;i++){
+        const t = Math.random();             // 0 顶部 → 1 底部
+        const y = baseY - t * height;
+        const halfWidth = t * height * 0.45;
+        const x = canvas.width/2 + (Math.random()*2-1)*halfWidth;
+
+        lights.push({
+            x,y,
+            r:Math.random()*2+1,
+            a:Math.random(),
+            v:Math.random()*0.03+0.01,
+            c:colors[Math.floor(Math.random()*colors.length)]
+        });
+    }
 }
+buildTree();
 
 // ===== 动画 =====
 function draw(){
-    ctx.clearRect(0,0,c.width,c.height);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
 
     lights.forEach(l=>{
-        l.a += l.s;
-        if(l.a>1 || l.a<0.2) l.s *= -1;
+        l.a += l.v;
+        if(l.a>1 || l.a<0.3) l.v*=-1;
 
         ctx.globalAlpha = l.a;
-        ctx.fillStyle = l.color;
+        ctx.fillStyle = l.c;
         ctx.beginPath();
         ctx.arc(l.x,l.y,l.r,0,Math.PI*2);
         ctx.fill();
@@ -85,12 +115,12 @@ function draw(){
 }
 draw();
 
-// ===== 微信音乐 =====
-let played=false;
+// ===== 微信音乐（强制点击） =====
+let started = false;
 document.body.addEventListener("click",()=>{
-    if(!played){
+    if(!started){
         document.getElementById("music").play();
-        played=true;
+        started = true;
     }
 });
 </script>
