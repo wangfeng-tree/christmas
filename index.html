@@ -5,11 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Merry Christmas</title>
 <style>
-body{margin:0;background:#000;color:#fff;text-align:center;overflow:hidden}
+body{
+    margin:0;
+    background:#000;
+    color:#fff;
+    text-align:center;
+    overflow:hidden;
+    font-family:Arial,"PingFang SC";
+}
 canvas{display:block}
 h1{margin-top:30px}
-.name{font-size:36px;color:#ffd700}
-.tip{position:fixed;bottom:20px;width:100%;font-size:14px}
+.name{font-size:36px;color:#ffd700;margin-top:10px}
+.tip{position:fixed;bottom:20px;width:100%;font-size:14px;opacity:.8}
 </style>
 </head>
 <body>
@@ -24,29 +31,68 @@ h1{margin-top:30px}
 </audio>
 
 <script>
-const p=new URLSearchParams(location.search);
-document.getElementById("name").innerText=p.get("name")||"亲爱的朋友";
+// ===== 名字 =====
+const params = new URLSearchParams(location.search);
+document.getElementById("name").innerText =
+    params.get("name") || "亲爱的朋友";
 
-const c=document.getElementById("c"),x=c.getContext("2d");
-c.width=innerWidth;c.height=innerHeight;
+// ===== Canvas =====
+const c = document.getElementById("c");
+const ctx = c.getContext("2d");
 
-let a=[];
-for(let i=0;i<400;i++){
- let y=Math.random()*c.height*0.6;
- let w=(c.height*0.6-y)*0.6;
- a.push({x:c.width/2+(Math.random()-0.5)*w,y:y+150,r:Math.random()*2+1});
+function resize(){
+    c.width = innerWidth;
+    c.height = innerHeight;
 }
-function d(){
- x.clearRect(0,0,c.width,c.height);
- a.forEach(o=>{
-  x.fillStyle=["red","gold","lime","cyan"][Math.floor(Math.random()*4)];
-  x.beginPath();x.arc(o.x,o.y,o.r,0,Math.PI*2);x.fill();
- });
- requestAnimationFrame(d);
-}
-d();
+resize();
+onresize = resize;
 
-document.body.onclick=()=>document.getElementById("music").play();
+// ===== 灯 =====
+const lights = [];
+const colors = ["red","gold","lime","cyan","magenta"];
+
+for(let i=0;i<500;i++){
+    const level = Math.random();
+    const y = c.height*0.75 - level*c.height*0.6;
+    const spread = (c.height*0.75 - y)*0.6;
+    lights.push({
+        x: c.width/2 + (Math.random()-0.5)*spread,
+        y,
+        r: Math.random()*2 + 1,
+        a: Math.random(),
+        s: Math.random()*0.05 + 0.01,
+        color: colors[Math.floor(Math.random()*colors.length)]
+    });
+}
+
+// ===== 动画 =====
+function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+
+    lights.forEach(l=>{
+        l.a += l.s;
+        if(l.a>1 || l.a<0.2) l.s *= -1;
+
+        ctx.globalAlpha = l.a;
+        ctx.fillStyle = l.color;
+        ctx.beginPath();
+        ctx.arc(l.x,l.y,l.r,0,Math.PI*2);
+        ctx.fill();
+    });
+
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(draw);
+}
+draw();
+
+// ===== 微信音乐 =====
+let played=false;
+document.body.addEventListener("click",()=>{
+    if(!played){
+        document.getElementById("music").play();
+        played=true;
+    }
+});
 </script>
 
 </body>
