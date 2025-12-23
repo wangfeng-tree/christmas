@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Merry Christmas</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
@@ -24,35 +24,36 @@ h1{
 
 .name{
     font-family:"Great Vibes","PingFang SC";
-    font-size:44px;
+    font-size:42px;
     color:#ffd700;
     margin:10px 0 20px;
-    text-shadow:0 0 10px #ffd700;
+    text-shadow:0 0 10px #ffd700,0 0 20px #ffb700;
 }
 
-/* 圣诞树 SVG */
-.tree-wrap{
-    width:260px;
+/* 圣诞树整体 */
+.tree{
+    width:240px;
     margin:0 auto;
 }
 
+/* 按钮 */
+button{
+    margin:20px auto;
+    padding:10px 26px;
+    font-size:16px;
+    border:none;
+    border-radius:22px;
+    background:#c00;
+    color:#fff;
+}
+
+/* 灯闪烁 */
 .light{
     animation: blink 1.5s infinite alternate;
 }
-
 @keyframes blink{
     from{opacity:.3;}
     to{opacity:1;}
-}
-
-button{
-    margin-top:20px;
-    padding:10px 22px;
-    font-size:16px;
-    border:none;
-    border-radius:20px;
-    background:#c00;
-    color:#fff;
 }
 </style>
 </head>
@@ -62,34 +63,37 @@ button{
 <h1>🎄 Merry Christmas 🎄</h1>
 <div class="name" id="name"></div>
 
-<div class="tree-wrap">
+<div class="tree">
 <svg viewBox="0 0 200 300" width="100%">
-  <polygon points="100,10 30,120 170,120" fill="#0a6"/>
-  <polygon points="100,60 20,180 180,180" fill="#0c8"/>
-  <polygon points="100,120 10,260 190,260" fill="#0e9"/>
+    <!-- 树 -->
+    <polygon points="100,10 30,120 170,120" fill="#0a6"/>
+    <polygon points="100,60 20,180 180,180" fill="#0c8"/>
+    <polygon points="100,120 10,260 190,260" fill="#0e9"/>
 
-  <!-- 灯 -->
-  <circle cx="100" cy="80" r="4" fill="red" class="light"/>
-  <circle cx="70" cy="140" r="4" fill="gold" class="light"/>
-  <circle cx="130" cy="140" r="4" fill="cyan" class="light"/>
-  <circle cx="50" cy="200" r="4" fill="magenta" class="light"/>
-  <circle cx="150" cy="200" r="4" fill="lime" class="light"/>
+    <!-- 灯 -->
+    <circle cx="100" cy="80" r="4" fill="red" class="light"/>
+    <circle cx="70" cy="120" r="4" fill="gold" class="light"/>
+    <circle cx="130" cy="120" r="4" fill="cyan" class="light"/>
+    <circle cx="60" cy="170" r="4" fill="magenta" class="light"/>
+    <circle cx="140" cy="170" r="4" fill="lime" class="light"/>
+    <circle cx="90" cy="220" r="4" fill="gold" class="light"/>
+    <circle cx="110" cy="220" r="4" fill="red" class="light"/>
 </svg>
 </div>
 
 <button id="play">▶ 播放圣诞音乐</button>
 
 <audio id="music" loop>
-  <source src="https://cdn.pixabay.com/download/audio/2022/12/02/audio_4d6a3b3a6d.mp3">
+    <source src="https://cdn.pixabay.com/download/audio/2022/12/02/audio_4d6a3b3a6d.mp3">
 </audio>
 
 <script>
-/* 名字 */
+// 名字
 const p = new URLSearchParams(location.search);
 document.getElementById("name").innerText =
     p.get("name") || "Merry Christmas";
 
-/* 音乐：微信 100% 成功方式 */
+// 音乐（微信 100% 成功写法）
 document.getElementById("play").onclick = function(){
     document.getElementById("music").play();
 };
