@@ -4,125 +4,135 @@
 <meta charset="UTF-8">
 <title>Merry Christmas</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- 艺术字体 -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+
 <style>
 html,body{
-    margin:0;
-    padding:0;
-    background:#000;
-    overflow:hidden;
+  margin:0;
+  padding:0;
+  background:#000;
+  overflow:hidden;
+  color:#fff;
 }
-canvas{display:block}
-.text{
-    position:absolute;
-    left:5%;
-    top:40%;
-    color:#fff;
-    font-size:32px;
-    font-family:"Times New Roman",serif;
-    opacity:.85;
+#text{
+  position:fixed;
+  left:5%;
+  top:20%;
+  font-family:'Great Vibes', cursive;
+  font-size:42px;
+  opacity:0.9;
+  z-index:10;
 }
+canvas{display:block;}
 </style>
 </head>
 <body>
 
-<div class="text">Merry Christmas</div>
-<canvas id="c"></canvas>
+<div id="text">
+  Merry Christmas<br>
+  <span style="font-size:32px;">To Wang Feng</span>
+</div>
+
+<!-- Three.js -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/examples/js/postprocessing/UnrealBloomPass.js"></script>
 
 <script>
-const canvas = document.getElementById("c");
-const ctx = canvas.getContext("2d");
+const scene = new THREE.Scene();
 
-function resize(){
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
-}
-resize();
-window.onresize = resize;
+const camera = new THREE.PerspectiveCamera(
+  60,
+  window.innerWidth/window.innerHeight,
+  0.1,
+  1000
+);
+camera.position.z = 35;
 
-// ========= 参数 =========
-const TREE_PARTS = 1800;
-const SNOW_PARTS = 400;
-const particles = [];
-const snow = [];
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+document.body.appendChild(renderer.domElement);
 
-const centerX = () => canvas.width/2;
-const baseY   = () => canvas.height*0.75;
+/* 粒子圣诞树 */
+const count = 12000;
+const geometry = new THREE.BufferGeometry();
+const positions = new Float32Array(count*3);
 
-// ========= 树粒子 =========
-for(let i=0;i<TREE_PARTS;i++){
-    const t = Math.random();
-    const angle = t * 12 * Math.PI;
-    particles.push({
-        t,
-        angle,
-        speed: Math.random()*0.002 + 0.001,
-        size: Math.random()*1.5 + 0.5
-    });
-}
+for(let i=0;i<count;i++){
+  const h = Math.random()*30;
+  const r = (1 - h/30) * 12;
+  const angle = h*0.6 + Math.random()*1.5;
 
-// ========= 雪 =========
-for(let i=0;i<SNOW_PARTS;i++){
-    snow.push({
-        x: Math.random()*canvas.width,
-        y: Math.random()*canvas.height,
-        r: Math.random()*2+1,
-        s: Math.random()*0.5+0.2
-    });
+  positions[i*3]   = Math.cos(angle)*r + (Math.random()-0.5)*0.6;
+  positions[i*3+1] = h - 15;
+  positions[i*3+2] = Math.sin(angle)*r + (Math.random()-0.5)*0.6;
 }
 
-function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+geometry.setAttribute('position', new THREE.BufferAttribute(positions,3));
 
-    // ---- 雪 ----
-    ctx.fillStyle="white";
-    snow.forEach(s=>{
-        s.y+=s.s;
-        if(s.y>canvas.height){s.y=0;s.x=Math.random()*canvas.width;}
-        ctx.globalAlpha=0.8;
-        ctx.beginPath();
-        ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-        ctx.fill();
-    });
+const material = new THREE.PointsMaterial({
+  color:0xffb6c1,
+  size:0.35,
+  transparent:true,
+  blending:THREE.AdditiveBlending,
+  depthWrite:false
+});
 
-    // ---- 地面光环 ----
-    const grd = ctx.createRadialGradient(
-        centerX(),baseY(),10,
-        centerX(),baseY(),200
-    );
-    grd.addColorStop(0,"rgba(255,255,255,.4)");
-    grd.addColorStop(1,"rgba(255,255,255,0)");
-    ctx.fillStyle=grd;
-    ctx.beginPath();
-    ctx.arc(centerX(),baseY(),200,0,Math.PI*2);
-    ctx.fill();
+const tree = new THREE.Points(geometry,material);
+scene.add(tree);
 
-    // ---- 圣诞树 ----
-    particles.forEach(p=>{
-        p.angle += p.speed;
+/* 雪花 */
+const snowGeo = new THREE.BufferGeometry();
+const snowCount = 1500;
+const snowPos = new Float32Array(snowCount*3);
 
-        const h = p.t * canvas.height*0.55;
-        const radius = (1-p.t) * 160;
-        const x = centerX() + Math.cos(p.angle)*radius;
-        const y = baseY() - h;
-
-        ctx.globalAlpha = 0.5 + Math.sin(p.angle*2)*0.5;
-        ctx.fillStyle = p.t<0.3 ? "#ffdede" : "#ffb3b3";
-        ctx.beginPath();
-        ctx.arc(x,y,p.size,0,Math.PI*2);
-        ctx.fill();
-    });
-
-    // ---- 树顶光 ----
-    ctx.globalAlpha=1;
-    ctx.fillStyle="white";
-    ctx.beginPath();
-    ctx.arc(centerX(),baseY()-canvas.height*0.55,6,0,Math.PI*2);
-    ctx.fill();
-
-    requestAnimationFrame(draw);
+for(let i=0;i<snowCount;i++){
+  snowPos[i*3]   = (Math.random()-0.5)*80;
+  snowPos[i*3+1] = Math.random()*60;
+  snowPos[i*3+2] = (Math.random()-0.5)*80;
 }
-draw();
+snowGeo.setAttribute('position', new THREE.BufferAttribute(snowPos,3));
+
+const snow = new THREE.Points(
+  snowGeo,
+  new THREE.PointsMaterial({
+    color:0xffffff,
+    size:0.25,
+    transparent:true
+  })
+);
+scene.add(snow);
+
+/* 泛光 */
+const composer = new THREE.EffectComposer(renderer);
+composer.addPass(new THREE.RenderPass(scene,camera));
+const bloom = new THREE.UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth,window.innerHeight),
+  1.5,
+  0.6,
+  0.15
+);
+composer.addPass(bloom);
+
+/* 动画 */
+function animate(){
+  requestAnimationFrame(animate);
+  tree.rotation.y += 0.002;
+  snow.rotation.y += 0.0005;
+  composer.render();
+}
+animate();
+
+window.onresize=()=>{
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  composer.setSize(window.innerWidth,window.innerHeight);
+}
 </script>
-
 </body>
 </html>
